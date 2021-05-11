@@ -1,0 +1,29 @@
+{{ define "content" }}
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-10 is-offset-1">
+                    <div class="box content">
+                        <h2 id="title">{{ .Article.Title }}</h2>
+                        <strong>{{ .Article.Author }}</strong>
+                        <p>{{ .Article.Time.Format "2006.01.02" }}</p>
+                        <hr>
+                        <p id="body">{{ .Article.Body }}</p>
+                        {{ if .IsOwner }}
+                            <div id="modal" class="modal">
+                                <div class="modal-background"></div>
+                                <div class="modal-content">
+                                    <div id="modal-box" class="box"></div>
+                                </div>
+                            </div>
+                            <button id="edit-button" class="button is-link is-light">Редактировать</button>
+                            <button id="delete-button" class="button is-danger is-light">Удалить</button>
+                            <script>let article_id = {{ .Article.Id }}</script>
+                            <script src="/front/article.js"></script>
+                        {{ end }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{{ end }}
