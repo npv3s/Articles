@@ -33,7 +33,7 @@ type Database interface {
 
 	GetArticles() (*[]Article, error)
 	GetArticle(id int) (*Article, error)
-	UpdateArticle(id int, body string) error
+	UpdateArticle(id int, title, body string) error
 	DeleteArticle(id int) error
 
 	GetComments(articleId int) ([]Comment, error)

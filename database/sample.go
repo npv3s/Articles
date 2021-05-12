@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -49,7 +50,8 @@ func (_ *SampleDB) GetArticle(id int) (*Article, error) {
 	}, nil
 }
 
-func (_ *SampleDB) UpdateArticle(id int, body string) error {
+func (_ *SampleDB) UpdateArticle(id int, title, body string) error {
+	log.Println("Article update:", title)
 	return nil
 }
 

@@ -3,8 +3,8 @@
         <div class="container">
             <div class="columns">
                 <div class="column is-10 is-offset-1">
-                    <div class="box content">
-                        <h2 id="title">{{ .Article.Title }}</h2>
+                    <div id="box" class="box">
+                        <h3 id="title" class="title is-3 mb-2">{{ .Article.Title }}</h3>
                         <strong>{{ .Article.Author }}</strong>
                         <p>{{ .Article.Time.Format "2006.01.02" }}</p>
                         <hr>
@@ -16,8 +16,10 @@
                                     <div id="modal-box" class="box"></div>
                                 </div>
                             </div>
-                            <button id="edit-button" class="button is-link is-light">Редактировать</button>
-                            <button id="delete-button" class="button is-danger is-light">Удалить</button>
+                            <div id="buttons" class="buttons mb-0 mt-3">
+                                <button id="edit-button" class="button is-info is-light">Редактировать</button>
+                                <button id="delete-button" class="button is-danger is-light">Удалить</button>
+                            </div>
                             <script>let article_id = {{ .Article.Id }}</script>
                             <script src="/front/article.js"></script>
                         {{ end }}

@@ -19,23 +19,15 @@ func main() {
 	}
 
 	db := database.NewSample()
-
 	h := handler.NewHandler(&db)
 
 	r := mux.NewRouter()
 
-	/*r.Path("/login").HandlerFunc(h.scheduleDeleteHandler)
-
-	r.Path("/logout").HandlerFunc(h.scheduleEditHandler)
-
-	r.Path("/article").HandlerFunc(h.scheduleGetJsonHandler)
-
-	r.Path("/comment").HandlerFunc(h.scheduleEditor)
-
-	r.Path("/table").HandlerFunc(h.scheduleTableHandler)
-	*/
-
 	r.Path("/article/{id:[0-9]+}/").HandlerFunc(h.Article)
+
+	r.Path("/article/update/{id:[0-9]+}/").HandlerFunc(h.ArticleUpdate)
+
+	r.Path("/article/delete/{id:[0-9]+}/").HandlerFunc(h.ArticleDelete)
 
 	r.PathPrefix("/front/").Handler(http.StripPrefix("/front/", http.FileServer(http.Dir("front/"))))
 
