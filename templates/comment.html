@@ -8,9 +8,12 @@
                     <br>
                     {{ .Text }}
                     <br>
-                    <small><a>Ответить</a> · {{ .Time.Format "2006.01.02 15:04" }}</small>
+                    <small>
+                        <a onclick="open_reply({{ .Id }})">Ответить</a>
+                        · {{ .Time.Format "01.02 15:04" }}</small>
                 </p>
             </div>
+            {{ template "reply" . }}
             {{ range .Comments }}
                 {{ template "comment" . }}
             {{ end }}

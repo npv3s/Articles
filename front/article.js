@@ -26,42 +26,27 @@ edit_button.onclick = () => {
 
     confirm_button.onclick = () => {
         text = edit_textarea.value
-        fetch('/article/update/' + article_id + '/', {
+        fetch('/article/update/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
+                'article_id': article_id,
                 'title': "Bye",
                 'body': text
             })
         })
             .then((r) => {
-                let modal = document.getElementById('modal')
-                let modal_box = document.getElementById('modal-box')
-                modal_box.innerHTML = ''
-                let text = document.createElement('p')
-                text.classList.add('mb-3')
-                let button = document.createElement('button')
-                button.innerText = 'Ok'
-
                 if (r.status === 200) {
-                    text.innerText = 'Статья успешно изменена'
-                    button.className = 'button is-info is-light'
-                    button.onclick = () => {
-                        document.location.reload()
-                    }
+                    overlay('Статья успешно изменена',
+                        () => document.location.reload()
+                    )
                 } else {
-                    text.innerText = 'Не удалось изменить статью'
-                    button.className = 'button is-info is-light'
-                    button.onclick = () => {
-                        modal.classList.remove('is-active')
-                    }
+                    overlay('Не удалось изменить статью',
+                        (modal) => modal.classList.remove('is-active')
+                    )
                 }
-
-                modal_box.appendChild(text)
-                modal_box.appendChild(button)
-                modal.classList.add('is-active')
             })
     }
 
@@ -84,26 +69,14 @@ edit_button.onclick = () => {
 delete_button.onclick = () => {
     fetch('/article/delete/' + article_id + '/')
         .then((r) => {
-            let modal = document.getElementById('modal')
-            let modal_box = document.getElementById('modal-box')
-            modal_box.innerHTML = ''
-            let text = document.createElement('p')
-            text.classList.add('mb-3')
-            let button = document.createElement('button')
-            button.innerText = 'Ok'
-
             if (r.status === 200) {
-                text.innerText = 'Статья удалена'
-                button.className = 'button is-info is-light'
-                button.onclick = () => document.location.href = '/'
+                overlay('Статья удалена',
+                    () => document.location.href = '/'
+                )
             } else {
-                text.innerText = 'Не удалось удалить статью'
-                button.className = 'button is-info is-light'
-                button.onclick = () => modal.classList.remove('is-active')
+                overlay('Не удалось удалить статью',
+                    (modal) => modal.classList.remove('is-active')
+                )
             }
-
-            modal_box.appendChild(text)
-            modal_box.appendChild(button)
-            modal.classList.add('is-active')
         })
 }

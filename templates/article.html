@@ -1,4 +1,13 @@
 {{ define "content" }}
+    {{ if .IsAuthorized }}
+        <div id="modal" class="modal">
+            <div class="modal-background"></div>
+            <div class="modal-content">
+                <div id="modal-box" class="box"></div>
+            </div>
+        </div>
+        <script src="/front/overlay.js"></script>
+    {{ end }}
     <section class="section">
         <div class="container">
             <div class="columns">
@@ -10,12 +19,6 @@
                         <hr>
                         <p id="body">{{ .Article.Body }}</p>
                         {{ if .IsOwner }}
-                            <div id="modal" class="modal">
-                                <div class="modal-background"></div>
-                                <div class="modal-content">
-                                    <div id="modal-box" class="box"></div>
-                                </div>
-                            </div>
                             <div id="buttons" class="buttons mb-0 mt-3">
                                 <button id="edit-button" class="button is-info is-light">Редактировать</button>
                                 <button id="delete-button" class="button is-danger is-light">Удалить</button>
@@ -29,24 +32,15 @@
                             {{ template "comment" . }}
                         {{ end }}
                         {{ if .IsAuthorized }}
-                            <article class="media">
-                                <figure class="media-left"></figure>
-                                <div class="media-content">
-                                    <div class="field">
-                                        <p class="control">
-                                            <textarea class="textarea" placeholder="Напишите комментарий"></textarea>
-                                        </p>
-                                    </div>
-                                    <a class="button is-info">Комментировать</a>
-                                </div>
-                            </article>
+                        {{ template "reply" .RootComment }}
+                        <script src="/front/comment.js"></script>
                         {{ else }}
-                            <article class="media">
-                                <figure class="media-left"></figure>
-                                <div class="media-content">
-                                    <p>Войдите что б оставить комментарий</p>
-                                </div>
-                            </article>
+                        <article class="media">
+                            <figure class="media-left"></figure>
+                            <div class="media-content">
+                                <p>Войдите что б оставить комментарий</p>
+                            </div>
+                        </article>
                         {{ end }}
                     </div>
                 </div>

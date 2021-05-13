@@ -4,6 +4,7 @@ import (
 	"main/authenticator"
 	"main/database"
 	"net/http"
+	"strconv"
 )
 
 type Handler struct {
@@ -18,8 +19,13 @@ func NewHandler(database interface{ database.Database }) Handler {
 	}
 }
 
-func (h *Handler) GetUser(r *http.Request) *string {
-	loginCookie, err := r.Cookie("login")
+func (h *Handler) GetUserId(r *http.Request) *int {
+	userIdCookie, err := r.Cookie("user_id")
+	if err != nil {
+		return nil
+	}
+
+	userId, err := strconv.Atoi(userIdCookie.Value)
 	if err != nil {
 		return nil
 	}
@@ -29,8 +35,8 @@ func (h *Handler) GetUser(r *http.Request) *string {
 		return nil
 	}
 
-	if h.authenticator.CheckSession(loginCookie.Value, tokenCookie.Value) {
-		return &loginCookie.Value
+	if h.authenticator.CheckSession(userId, tokenCookie.Value) {
+		return &userId
 	}
 
 	return nil

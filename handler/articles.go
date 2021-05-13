@@ -49,20 +49,30 @@ func (h *Handler) Article(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	tp, err := template.New("").ParseFiles("templates/base.html", "templates/article.html", "templates/comment.html")
+	tp, err := template.New("").ParseFiles("templates/base.html", "templates/article.html", "templates/comment.html", "templates/reply.html")
 	if err != nil {
 		log.Fatal("Template rendering error:", err)
 	}
 
+	rootComment := struct {
+		Id   int
+		Root *int
+	}{
+		0,
+		nil,
+	}
+
 	content := struct {
-		Article *database.Article
-		IsOwner bool
+		Article      *database.Article
+		RootComment  interface{}
+		IsOwner      bool
 		IsAuthorized bool
 	}{
 		article,
 		//&article.Author == user,
-		true,
-		true,
+		rootComment,
+		false,
+		false,
 	}
 
 	err = tp.ExecuteTemplate(w, "base", struct {
@@ -78,27 +88,22 @@ func (h *Handler) Article(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ArticleUpdate(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	articleId, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		log.Println("Unknown article id:", vars["id"])
-	}
-
 	type ArticleUpdate struct {
+		Id    int    `json:"article_id"`
 		Title string `json:"title"`
-		Body string `json:"body"`
+		Body  string `json:"body"`
 	}
 
 	var articleUpdate ArticleUpdate
 
-	err = json.NewDecoder(r.Body).Decode(&articleUpdate)
+	err := json.NewDecoder(r.Body).Decode(&articleUpdate)
 	if err != nil {
 		log.Println("Json parse error:", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	err = h.database.UpdateArticle(articleId, articleUpdate.Title, articleUpdate.Body)
+	err = h.database.UpdateArticle(1, articleUpdate.Id, articleUpdate.Title, articleUpdate.Body)
 	if err != nil {
 		log.Println("Article update error:", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -109,15 +114,20 @@ func (h *Handler) ArticleUpdate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ArticleDelete(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	articleId, err := strconv.Atoi(vars["id"])
+	type ArticleDelete struct {
+		Id int `json:"article_id"`
+	}
+
+	var articleDelete ArticleDelete
+
+	err := json.NewDecoder(r.Body).Decode(&articleDelete)
 	if err != nil {
-		log.Println("Unknown article id:", vars["id"])
+		log.Println("Json parse error:", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	err = h.database.DeleteArticle(articleId)
+	err = h.database.DeleteArticle(1, articleDelete.Id)
 	if err != nil {
 		log.Println("Article delete error:", err)
 		w.WriteHeader(http.StatusInternalServerError)

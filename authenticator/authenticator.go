@@ -5,9 +5,10 @@ import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"main/database"
+	"strconv"
 )
 
-type sessions map[string]hash
+type sessions map[int]hash
 
 type hash []byte
 
@@ -23,16 +24,16 @@ func NewAuthenticator(database database.Database) Authenticator {
 	}
 }
 
-func (a *Authenticator) NewUser(login, password string) error {
+func (a *Authenticator) NewUser(login, password string) (*int, error) {
 	hashBytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
-		return errors.New("Hash gen error: " + err.Error())
+		return nil, errors.New("Hash gen error: " + err.Error())
 	}
 	return a.database.NewUser(login, string(hashBytes))
 }
 
 func (a *Authenticator) Login(login, password string) error {
-	user, err := a.database.GetPassword(login)
+	user, err := a.database.GetUserByLogin(login)
 	if err != nil {
 		return errors.New("User " + login + " is not found")
 	}
@@ -45,15 +46,15 @@ func (a *Authenticator) Login(login, password string) error {
 	return nil
 }
 
-func (a *Authenticator) GetSession(login string) (string, error) {
-	token, ok := a.sessions[login]
+func (a *Authenticator) GetSession(userId int) (string, error) {
+	token, ok := a.sessions[userId]
 	if ok {
 		return string(token), nil
 	}
 
-	passwd, err := a.database.GetPassword(login)
+	passwd, err := a.database.GetUserById(userId)
 	if err != nil {
-		return "", errors.New("No such user " + login)
+		return "", errors.New("No user with id " + strconv.Itoa(userId))
 	}
 
 	hashBytes, err := bcrypt.GenerateFromPassword([]byte(passwd.PassHash), 14)
@@ -64,8 +65,8 @@ func (a *Authenticator) GetSession(login string) (string, error) {
 	return string(hashBytes), nil
 }
 
-func (a *Authenticator) CheckSession(login, token string) bool {
-	rightHash, ok := a.sessions[login]
+func (a *Authenticator) CheckSession(userId int, token string) bool {
+	rightHash, ok := a.sessions[userId]
 	if ok {
 		return bytes.Equal(rightHash, []byte(token))
 	}

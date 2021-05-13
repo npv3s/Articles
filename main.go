@@ -25,11 +25,11 @@ func main() {
 
 	r.Path("/article/{id:[0-9]+}/").HandlerFunc(h.Article)
 
-	r.Path("/article/update/{id:[0-9]+}/").HandlerFunc(h.ArticleUpdate)
+	r.Path("/article/update/").HandlerFunc(h.ArticleUpdate)
 
-	r.Path("/article/delete/{id:[0-9]+}/").HandlerFunc(h.ArticleDelete)
+	r.Path("/article/delete/").HandlerFunc(h.ArticleDelete)
 
-	r.Path("/comment/new/{id:[0-9]+}/").HandlerFunc(h.AddComment)
+	r.Path("/comment/new/").HandlerFunc(h.AddComment)
 
 	r.PathPrefix("/front/").Handler(http.StripPrefix("/front/", http.FileServer(http.Dir("front/"))))
 

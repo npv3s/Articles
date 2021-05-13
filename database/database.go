@@ -20,29 +20,31 @@ type ArticleDescription struct {
 
 type Article struct {
 	ArticleDescription
-	Body   string
+	Body     string
 	Comments []Comment
 }
 
 type Comment struct {
-	Id     int
-	Author string
-	Text   string
-	Time   time.Time
+	Root     *int
+	Id       int
+	Author   string
+	Text     string
+	Time     time.Time
 	Comments []Comment
 }
 
 type Database interface {
-	NewUser(login, password string) error
-	GetPassword(login string) (*User, error)
+	NewUser(login, password string) (*int, error)
+	GetUserByLogin(login string) (*User, error)
+	GetUserById(userId int) (*User, error)
 
 	GetArticles() (*[]ArticleDescription, error)
 	GetArticle(id int) (*Article, error)
-	UpdateArticle(id int, title, body string) error
-	DeleteArticle(id int) error
+	UpdateArticle(authorId, articleId int, title, body string) error
+	DeleteArticle(authorId, articleId int) error
 
 	GetComments(articleId int) ([]Comment, error)
-	NewComment(articleId int, author, text string, root *int) error
-	UpdateComment(comment Comment) error
-	DeleteComment(commentId int) error
+	NewComment(authorId, articleId int, text string, root *int) error
+	UpdateComment(authorId, commentId int, text string) error
+	DeleteComment(authorId, commentId int) error
 }

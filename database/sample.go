@@ -13,14 +13,27 @@ func NewSample() SampleDB {
 	return SampleDB{}
 }
 
-func (_ *SampleDB) NewUser(login, password string) error {
+func (_ *SampleDB) NewUser(login, password string) (*int, error) {
 	fmt.Println("Login:", login)
 	fmt.Println("password:", password)
-	return nil
+	id := 0
+	return &id, nil
 }
 
-func (_ *SampleDB) GetPassword(login string) (*User, error) {
+func (_ *SampleDB) GetUserByLogin(login string) (*User, error) {
 	if login == "npv3s" {
+		return &User{
+			1,
+			"npv3s",
+			"12345",
+		}, nil
+	} else {
+		return nil, errors.New("no such user")
+	}
+}
+
+func (_ *SampleDB) GetUserById(userId int) (*User, error) {
+	if userId == 1 {
 		return &User{
 			1,
 			"npv3s",
@@ -45,42 +58,46 @@ func (_ *SampleDB) GetArticle(id int) (*Article, error) {
 		"и посажены в тюрьму из-за того, что Post Office упорно настаивал на том, что программному обеспечению " +
 		"можно доверять. После десятилетий баталий приговоры 39 человек, наконец, отменили. Случай стал крупнейшей " +
 		"судебной ошибкой, которую когда-либо видела Великобритания."
+	digits := []int{0, 1, 2, 3, 4, 5}
 	return &Article{
 		ArticleDescription{id, "npv3s", "Hi", time.Now(), []Tag{}}, text, []Comment{
-			{1, "npv3s", "Hello", time.Now(), nil},
-			{2, "npv3s", "Bye", time.Now(), []Comment{
-				{3, "abc", "Goodbye", time.Now(), []Comment{}},
+			{nil, 1, "npv3s", "Hello", time.Now(), nil},
+			{nil, 2, "npv3s", "Bye", time.Now(), []Comment{
+				{&digits[1], 3, "abc", "Goodbye", time.Now(), []Comment{}},
 			}}},
 	}, nil
 }
 
-func (_ *SampleDB) UpdateArticle(id int, title, body string) error {
+func (_ *SampleDB) UpdateArticle(authorId, articleId int, title, body string) error {
 	log.Println("Article update:", title)
 	return nil
 }
 
-func (_ *SampleDB) DeleteArticle(id int) error {
+func (_ *SampleDB) DeleteArticle(authorId, articleId int) error {
 	return nil
 }
 
 func (_ *SampleDB) GetComments(articleId int) ([]Comment, error) {
+	one := 1
 	return []Comment{
-		{1, "npv3s", "Hello", time.Now(), nil},
-		{2, "npv3s", "Bye", time.Now(), []Comment{
-			{3, "abc", "Goodbye", time.Now(), []Comment{}},
+		{nil, 1, "npv3s", "Hello", time.Now(), nil},
+		{nil, 2, "npv3s", "Bye", time.Now(), []Comment{
+			{&one, 3, "abc", "Goodbye", time.Now(), []Comment{}},
 		}},
 	}, nil
 }
 
-func (_ *SampleDB) NewComment(articleId int, author, text string, root *int) error {
-	fmt.Println(author, text)
+func (_ *SampleDB) NewComment(authorId, articleId int, text string, root *int) error {
+	fmt.Println("New comment:", authorId, text)
 	return nil
 }
 
-func (_ *SampleDB) UpdateComment(comment Comment) error {
+func (_ *SampleDB) UpdateComment(authorId, commentId int, text string) error {
+	fmt.Println("Update comment:", commentId, text)
 	return nil
 }
 
-func (_ *SampleDB) DeleteComment(commentId int) error {
+func (_ *SampleDB) DeleteComment(authorId, commentId int) error {
+	fmt.Println("Delete comment:", commentId)
 	return nil
 }
