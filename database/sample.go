@@ -72,7 +72,8 @@ func (_ *SampleDB) GetComments(articleId int) ([]Comment, error) {
 	}, nil
 }
 
-func (_ *SampleDB) NewComment(comment Comment) error {
+func (_ *SampleDB) NewComment(articleId int, author, text string, root *int) error {
+	fmt.Println(author, text)
 	return nil
 }
 

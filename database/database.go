@@ -42,7 +42,7 @@ type Database interface {
 	DeleteArticle(id int) error
 
 	GetComments(articleId int) ([]Comment, error)
-	NewComment(comment Comment) error
+	NewComment(articleId int, author, text string, root *int) error
 	UpdateComment(comment Comment) error
 	DeleteComment(commentId int) error
 }

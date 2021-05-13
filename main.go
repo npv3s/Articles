@@ -29,6 +29,8 @@ func main() {
 
 	r.Path("/article/delete/{id:[0-9]+}/").HandlerFunc(h.ArticleDelete)
 
+	r.Path("/comment/new/{id:[0-9]+}/").HandlerFunc(h.AddComment)
+
 	r.PathPrefix("/front/").Handler(http.StripPrefix("/front/", http.FileServer(http.Dir("front/"))))
 
 	r.Path("/").HandlerFunc(h.Articles)
