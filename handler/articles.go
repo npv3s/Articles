@@ -49,7 +49,7 @@ func (h *Handler) Article(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	tp, err := template.New("").ParseFiles("templates/base.html", "templates/article.html")
+	tp, err := template.New("").ParseFiles("templates/base.html", "templates/article.html", "templates/comment.html")
 	if err != nil {
 		log.Fatal("Template rendering error:", err)
 	}
@@ -57,9 +57,11 @@ func (h *Handler) Article(w http.ResponseWriter, r *http.Request) {
 	content := struct {
 		Article *database.Article
 		IsOwner bool
+		IsAuthorized bool
 	}{
 		article,
 		//&article.Author == user,
+		true,
 		true,
 	}
 

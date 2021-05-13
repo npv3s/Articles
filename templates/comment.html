@@ -1,0 +1,21 @@
+{{ define "comment" }}
+    <article class="media">
+        <figure class="media-left"></figure>
+        <div class="media-content">
+            <div class="content">
+                <p>
+                    <strong>{{ .Author }}</strong>
+                    <br>
+                    {{ .Text }}
+                    <br>
+                    <small><a>Ответить</a> · {{ .Time.Format "2006.01.02 15:04" }}</small>
+                </p>
+            </div>
+            {{ range .Comments }}
+                {{ template "comment" . }}
+            {{ end }}
+        </div>
+    </article>
+{{ end }}
+
+{{ template "comment" }}

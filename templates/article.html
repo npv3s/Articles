@@ -24,6 +24,31 @@
                             <script src="/front/article.js"></script>
                         {{ end }}
                     </div>
+                    <div class="box">
+                        {{ range .Article.Comments }}
+                            {{ template "comment" . }}
+                        {{ end }}
+                        {{ if .IsAuthorized }}
+                            <article class="media">
+                                <figure class="media-left"></figure>
+                                <div class="media-content">
+                                    <div class="field">
+                                        <p class="control">
+                                            <textarea class="textarea" placeholder="Напишите комментарий"></textarea>
+                                        </p>
+                                    </div>
+                                    <a class="button is-info">Комментировать</a>
+                                </div>
+                            </article>
+                        {{ else }}
+                            <article class="media">
+                                <figure class="media-left"></figure>
+                                <div class="media-content">
+                                    <p>Войдите что б оставить комментарий</p>
+                                </div>
+                            </article>
+                        {{ end }}
+                    </div>
                 </div>
             </div>
         </div>

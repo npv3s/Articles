@@ -10,28 +10,33 @@ type User struct {
 
 type Tag string
 
-type Article struct {
+type ArticleDescription struct {
 	Id     int
 	Author string
 	Title  string
-	Body   string
 	Time   time.Time
 	Tags   []Tag
 }
 
+type Article struct {
+	ArticleDescription
+	Body   string
+	Comments []Comment
+}
+
 type Comment struct {
 	Id     int
-	Root   *int
 	Author string
 	Text   string
 	Time   time.Time
+	Comments []Comment
 }
 
 type Database interface {
 	NewUser(login, password string) error
 	GetPassword(login string) (*User, error)
 
-	GetArticles() (*[]Article, error)
+	GetArticles() (*[]ArticleDescription, error)
 	GetArticle(id int) (*Article, error)
 	UpdateArticle(id int, title, body string) error
 	DeleteArticle(id int) error

@@ -31,10 +31,10 @@ func (_ *SampleDB) GetPassword(login string) (*User, error) {
 	}
 }
 
-func (_ *SampleDB) GetArticles() (*[]Article, error) {
-	return &[]Article{
-		{0, "npv3s", "Hi", "", time.Now(), nil},
-		{1, "npv3s", "Bye", "", time.Now(), nil},
+func (_ *SampleDB) GetArticles() (*[]ArticleDescription, error) {
+	return &[]ArticleDescription{
+		{0, "npv3s", "Hi", time.Now(), []Tag{}},
+		{1, "npv3s", "Bye", time.Now(), []Tag{}},
 	}, nil
 }
 
@@ -46,7 +46,11 @@ func (_ *SampleDB) GetArticle(id int) (*Article, error) {
 		"можно доверять. После десятилетий баталий приговоры 39 человек, наконец, отменили. Случай стал крупнейшей " +
 		"судебной ошибкой, которую когда-либо видела Великобритания."
 	return &Article{
-		id, "npv3s", "Hi", text, time.Now(), nil,
+		ArticleDescription{id, "npv3s", "Hi", time.Now(), []Tag{}}, text, []Comment{
+			{1, "npv3s", "Hello", time.Now(), nil},
+			{2, "npv3s", "Bye", time.Now(), []Comment{
+				{3, "abc", "Goodbye", time.Now(), []Comment{}},
+			}}},
 	}, nil
 }
 
@@ -60,10 +64,11 @@ func (_ *SampleDB) DeleteArticle(id int) error {
 }
 
 func (_ *SampleDB) GetComments(articleId int) ([]Comment, error) {
-	one := 1
 	return []Comment{
-		{1, nil, "npv3s", "Hello", time.Now()},
-		{2, &one, "npv3s", "Bye", time.Now()},
+		{1, "npv3s", "Hello", time.Now(), nil},
+		{2, "npv3s", "Bye", time.Now(), []Comment{
+			{3, "abc", "Goodbye", time.Now(), []Comment{}},
+		}},
 	}, nil
 }
 
