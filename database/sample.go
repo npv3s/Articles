@@ -44,10 +44,10 @@ func (_ *SampleDB) GetUserById(userId int) (*User, error) {
 	}
 }
 
-func (_ *SampleDB) GetArticles() (*[]ArticleDescription, error) {
-	return &[]ArticleDescription{
-		{0, "npv3s", "Hi", time.Now(), []Tag{}},
-		{1, "npv3s", "Bye", time.Now(), []Tag{}},
+func (_ *SampleDB) GetArticles() ([]ArticleDescription, error) {
+	return []ArticleDescription{
+		{0, "npv3s", "Hi", time.Now()},
+		{1, "npv3s", "Bye", time.Now()},
 	}, nil
 }
 
@@ -60,7 +60,7 @@ func (_ *SampleDB) GetArticle(id int) (*Article, error) {
 		"судебной ошибкой, которую когда-либо видела Великобритания."
 	digits := []int{0, 1, 2, 3, 4, 5}
 	return &Article{
-		ArticleDescription{id, "npv3s", "Hi", time.Now(), []Tag{}}, text, []Comment{
+		ArticleDescription{id, "npv3s", "Hi", time.Now()}, 1, text, []Comment{
 			{nil, 1, "npv3s", "Hello", time.Now(), nil},
 			{nil, 2, "npv3s", "Bye", time.Now(), []Comment{
 				{&digits[1], 3, "abc", "Goodbye", time.Now(), []Comment{}},
@@ -100,4 +100,9 @@ func (_ *SampleDB) UpdateComment(authorId, commentId int, text string) error {
 func (_ *SampleDB) DeleteComment(authorId, commentId int) error {
 	fmt.Println("Delete comment:", commentId)
 	return nil
+}
+
+func (_ *SampleDB) NewArticle(text string) (*int, error) {
+	one := 1
+	return &one, nil
 }

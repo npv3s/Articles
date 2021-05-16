@@ -8,18 +8,16 @@ type User struct {
 	PassHash string
 }
 
-type Tag string
-
 type ArticleDescription struct {
 	Id     int
 	Author string
 	Title  string
 	Time   time.Time
-	Tags   []Tag
 }
 
 type Article struct {
 	ArticleDescription
+	AuthorId int
 	Body     string
 	Comments []Comment
 }
@@ -34,11 +32,12 @@ type Comment struct {
 }
 
 type Database interface {
-	NewUser(login, password string) (*int, error)
+	NewUser(login, passHash string) (*int, error)
 	GetUserByLogin(login string) (*User, error)
 	GetUserById(userId int) (*User, error)
 
-	GetArticles() (*[]ArticleDescription, error)
+	NewArticle(text string) (*int, error)
+	GetArticles() ([]ArticleDescription, error)
 	GetArticle(id int) (*Article, error)
 	UpdateArticle(authorId, articleId int, title, body string) error
 	DeleteArticle(authorId, articleId int) error
