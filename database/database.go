@@ -36,11 +36,11 @@ type Database interface {
 	GetUserByLogin(login string) (*User, error)
 	GetUserById(userId int) (*User, error)
 
-	NewArticle(text string) (*int, error)
+	NewArticle(authorId int, title, text string) (*int, error)
 	GetArticles() ([]ArticleDescription, error)
 	GetArticle(id int) (*Article, error)
-	UpdateArticle(authorId, articleId int, title, body string) error
-	DeleteArticle(authorId, articleId int) error
+	UpdateArticle(userId, articleId int, title, body string) error
+	DeleteArticle(userId, articleId int) error
 
 	GetComments(articleId int) ([]Comment, error)
 	NewComment(authorId, articleId int, text string, root *int) error

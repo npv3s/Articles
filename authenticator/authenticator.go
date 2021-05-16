@@ -32,18 +32,18 @@ func (a *Authenticator) NewUser(login, password string) (*int, error) {
 	return a.database.NewUser(login, string(hashBytes))
 }
 
-func (a *Authenticator) Login(login, password string) error {
+func (a *Authenticator) Login(login, password string) (*int, error) {
 	user, err := a.database.GetUserByLogin(login)
 	if err != nil {
-		return errors.New("User " + login + " is not found")
+		return nil, errors.New("User " + login + " is not found")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(user.PassHash))
+	err = bcrypt.CompareHashAndPassword([]byte(user.PassHash), []byte(password))
 	if err != nil {
-		return errors.New("Wrong password for user " + login)
+		return nil, errors.New("Wrong password for user " + login)
 	}
 
-	return nil
+	return &user.Id, nil
 }
 
 func (a *Authenticator) GetSession(userId int) (string, error) {
@@ -61,6 +61,8 @@ func (a *Authenticator) GetSession(userId int) (string, error) {
 	if err != nil {
 		return "", errors.New("Hash gen error: " + err.Error())
 	}
+
+	a.sessions[userId] = hashBytes
 
 	return string(hashBytes), nil
 }
