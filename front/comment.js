@@ -10,13 +10,13 @@ function close_reply(id) {
     document.getElementById('reply-' + id).classList.add('is-hidden')
 }
 
-function new_comment(id, root) {
+function new_comment(id) {
     let textarea = document.getElementById('reply-area-' + id)
     fetch('/comment/new/', {
         method: 'POST',
         body: JSON.stringify({
             "article_id": article_id,
-            "root": root,
+            "root": id === 0 ? null : id,
             "body": textarea.value
         })
     }).then((r) => {

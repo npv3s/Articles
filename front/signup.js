@@ -4,7 +4,7 @@ let password_input = document.getElementById('password')
 
 login_button.onclick = () => {
     login_button.classList.add('is-loading')
-    fetch('/login/', {
+    fetch('/signup/', {
         method: 'POST',
         body: JSON.stringify({
             'login': login_input.value,
@@ -13,12 +13,10 @@ login_button.onclick = () => {
     })
         .then((r) => {
             if (r.status === 200) {
-                document.location.href = '/'
+                document.location.href = '/login/'
             } else {
-                document.querySelectorAll('.input').forEach((e) => {
-                    e.classList.add('is-danger')
-                    e.onclick = () => e.classList.remove('is-danger')
-                })
+                overlay("Не удалось зарегистрировать!",
+                    (modal) => modal.classList.remove('is-active'))
             }
         })
         .finally(() => login_button.classList.remove('is-loading'))

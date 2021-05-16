@@ -67,7 +67,12 @@ edit_button.onclick = () => {
 }
 
 delete_button.onclick = () => {
-    fetch('/article/delete/' + article_id + '/')
+    fetch('/article/delete/', {
+        method: 'POST',
+        body: JSON.stringify({
+            "article_id": article_id
+        })
+    })
         .then((r) => {
             if (r.status === 200) {
                 overlay('Статья удалена',
