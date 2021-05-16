@@ -10,11 +10,11 @@ import (
 	"strconv"
 )
 
-func (h *Handler) Articles(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Articles(w http.ResponseWriter, _ *http.Request) {
 	articles, err := h.database.GetArticles()
 	if err != nil {
-		log.Println("Get all articles error:", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Get all articles error: "+err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	tp, err := template.New("").ParseFiles("templates/base.html", "templates/articles.html")
@@ -41,12 +41,19 @@ func (h *Handler) Article(w http.ResponseWriter, r *http.Request) {
 		log.Println("Unknown article id:", vars["id"])
 	}
 
-	//user := h.GetUser(r)
+	user := h.GetUserId(r)
 
 	article, err := h.database.GetArticle(articleId)
 	if err != nil {
-		log.Println("Get", articleId, "article error:", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Get "+strconv.Itoa(articleId)+", article error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	isOwner := false
+	if user != nil {
+		if *user == article.AuthorId {
+			isOwner = true
+		}
 	}
 
 	tp, err := template.New("").ParseFiles("templates/base.html", "templates/article.html", "templates/comment.html", "templates/reply.html")
@@ -69,10 +76,9 @@ func (h *Handler) Article(w http.ResponseWriter, r *http.Request) {
 		IsAuthorized bool
 	}{
 		article,
-		//&article.Author == user,
 		rootComment,
-		false,
-		false,
+		isOwner,
+		user != nil,
 	}
 
 	err = tp.ExecuteTemplate(w, "base", struct {
@@ -83,11 +89,18 @@ func (h *Handler) Article(w http.ResponseWriter, r *http.Request) {
 		content,
 	})
 	if err != nil {
-		log.Println("Template rendering error:", err)
+		http.Error(w, "Template rendering error: "+err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
 func (h *Handler) ArticleUpdate(w http.ResponseWriter, r *http.Request) {
+	user := h.GetUserId(r)
+	if user == nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	type ArticleUpdate struct {
 		Id    int    `json:"article_id"`
 		Title string `json:"title"`
@@ -103,7 +116,7 @@ func (h *Handler) ArticleUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.database.UpdateArticle(1, articleUpdate.Id, articleUpdate.Title, articleUpdate.Body)
+	err = h.database.UpdateArticle(*user, articleUpdate.Id, articleUpdate.Title, articleUpdate.Body)
 	if err != nil {
 		log.Println("Article update error:", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -114,6 +127,12 @@ func (h *Handler) ArticleUpdate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ArticleDelete(w http.ResponseWriter, r *http.Request) {
+	user := h.GetUserId(r)
+	if user == nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	type ArticleDelete struct {
 		Id int `json:"article_id"`
 	}
@@ -127,12 +146,72 @@ func (h *Handler) ArticleDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.database.DeleteArticle(1, articleDelete.Id)
+	err = h.database.DeleteArticle(*user, articleDelete.Id)
 	if err != nil {
-		log.Println("Article delete error:", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w,"Article delete error: " + err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) ArticleForm(w http.ResponseWriter, _ *http.Request) {
+	tp, err := template.New("").ParseFiles("templates/base.html", "templates/new-article.html")
+	if err != nil {
+		log.Fatal("Template rendering error:", err)
+	}
+
+	content := struct{}{}
+
+	err = tp.ExecuteTemplate(w, "base", struct {
+		Title   string
+		Content interface{}
+	}{
+		"Новая статья",
+		content,
+	})
+
+	if err != nil {
+		http.Error(w, "Template rendering error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *Handler) ArticleNew(w http.ResponseWriter, r *http.Request) {
+	user := h.GetUserId(r)
+	if user == nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	type NewArticle struct {
+		Title string `json:"title"`
+		Text string `json:"body"`
+	}
+
+	var article NewArticle
+
+	err := json.NewDecoder(r.Body).Decode(&article)
+	if err != nil {
+		log.Println("json parse error:", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	articleId, err := h.database.NewArticle(*user, article.Title, article.Text)
+	if err != nil {
+		http.Error(w, "article add error: " + err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+
+	err = json.NewEncoder(w).Encode(struct {
+		ArticleId int `json:"article_id"`
+	}{
+		*articleId,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }

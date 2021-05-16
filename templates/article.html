@@ -7,6 +7,7 @@
             </div>
         </div>
         <script src="/front/overlay.js"></script>
+        <script>let article_id = {{ .Article.Id }}</script>
     {{ end }}
     <section class="section">
         <div class="container">
@@ -23,7 +24,6 @@
                                 <button id="edit-button" class="button is-info is-light">Редактировать</button>
                                 <button id="delete-button" class="button is-danger is-light">Удалить</button>
                             </div>
-                            <script>let article_id = {{ .Article.Id }}</script>
                             <script src="/front/article.js"></script>
                         {{ end }}
                     </div>
@@ -35,6 +35,8 @@
                         {{ template "reply" .RootComment }}
                         <script src="/front/comment.js"></script>
                         {{ else }}
+                        <script>let open_reply = (id) => {
+                            }  </script>
                         <article class="media">
                             <figure class="media-left"></figure>
                             <div class="media-content">

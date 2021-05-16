@@ -18,10 +18,25 @@ func main() {
 		log.Printf("Defaulting to port %s", port)
 	}
 
-	db := database.NewSample()
-	h := handler.NewHandler(&db)
+	db, err := database.NewPgPool(os.Getenv("DB_URL"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	h := handler.NewHandler(db)
 
 	r := mux.NewRouter()
+
+	r.Path("/login/").Methods("GET").HandlerFunc(h.LoginForm)
+
+	r.Path("/login/").Methods("POST").HandlerFunc(h.Login)
+
+	r.Path("/signup/").Methods("GET").HandlerFunc(h.SignUpForm)
+
+	r.Path("/signup/").Methods("POST").HandlerFunc(h.SignUp)
+
+	r.Path("/article/new/").Methods("GET").HandlerFunc(h.ArticleForm)
+
+	r.Path("/article/new/").Methods("POST").HandlerFunc(h.ArticleNew)
 
 	r.Path("/article/{id:[0-9]+}/").HandlerFunc(h.Article)
 
