@@ -10,7 +10,9 @@ import (
 	"strconv"
 )
 
-func (h *Handler) Articles(w http.ResponseWriter, _ *http.Request) {
+func (h *Handler) Articles(w http.ResponseWriter, r *http.Request) {
+	user := h.GetUserId(r)
+
 	articles, err := h.database.GetArticles()
 	if err != nil {
 		http.Error(w, "Get all articles error: "+err.Error(), http.StatusInternalServerError)
@@ -22,13 +24,7 @@ func (h *Handler) Articles(w http.ResponseWriter, _ *http.Request) {
 		log.Fatal("Template rendering error:", err)
 	}
 
-	err = tp.ExecuteTemplate(w, "base", struct {
-		Title   string
-		Content interface{}
-	}{
-		"Статьи",
-		articles,
-	})
+	err = tp.ExecuteTemplate(w, "base", baseTemplate{"Статьи", user != nil, articles})
 	if err != nil {
 		log.Println("Template rendering error:", err)
 	}
@@ -81,13 +77,7 @@ func (h *Handler) Article(w http.ResponseWriter, r *http.Request) {
 		user != nil,
 	}
 
-	err = tp.ExecuteTemplate(w, "base", struct {
-		Title   string
-		Content interface{}
-	}{
-		article.Title,
-		content,
-	})
+	err = tp.ExecuteTemplate(w, "base", baseTemplate{article.Title, user != nil, content})
 	if err != nil {
 		http.Error(w, "Template rendering error: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -148,29 +138,26 @@ func (h *Handler) ArticleDelete(w http.ResponseWriter, r *http.Request) {
 
 	err = h.database.DeleteArticle(*user, articleDelete.Id)
 	if err != nil {
-		http.Error(w,"Article delete error: " + err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Article delete error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *Handler) ArticleForm(w http.ResponseWriter, _ *http.Request) {
+func (h *Handler) ArticleForm(w http.ResponseWriter, r *http.Request) {
+	user := h.GetUserId(r)
+	if user == nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	tp, err := template.New("").ParseFiles("templates/base.html", "templates/new-article.html")
 	if err != nil {
 		log.Fatal("Template rendering error:", err)
 	}
 
-	content := struct{}{}
-
-	err = tp.ExecuteTemplate(w, "base", struct {
-		Title   string
-		Content interface{}
-	}{
-		"Новая статья",
-		content,
-	})
-
+	err = tp.ExecuteTemplate(w, "base", baseTemplate{"Новая статья", true, struct{}{}})
 	if err != nil {
 		http.Error(w, "Template rendering error: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -186,7 +173,7 @@ func (h *Handler) ArticleNew(w http.ResponseWriter, r *http.Request) {
 
 	type NewArticle struct {
 		Title string `json:"title"`
-		Text string `json:"body"`
+		Text  string `json:"body"`
 	}
 
 	var article NewArticle
@@ -200,7 +187,7 @@ func (h *Handler) ArticleNew(w http.ResponseWriter, r *http.Request) {
 
 	articleId, err := h.database.NewArticle(*user, article.Title, article.Text)
 	if err != nil {
-		http.Error(w, "article add error: " + err.Error(), http.StatusInternalServerError)
+		http.Error(w, "article add error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 

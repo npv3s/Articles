@@ -7,6 +7,12 @@ import (
 	"strconv"
 )
 
+type baseTemplate struct {
+	Title string
+	IsAuthorized bool
+	Content interface{}
+}
+
 type Handler struct {
 	authenticator authenticator.Authenticator
 	database      interface{ database.Database }

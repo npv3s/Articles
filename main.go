@@ -34,6 +34,8 @@ func main() {
 
 	r.Path("/signup/").Methods("POST").HandlerFunc(h.SignUp)
 
+	r.Path("/logout/").HandlerFunc(h.Logout)
+
 	r.Path("/article/new/").Methods("GET").HandlerFunc(h.ArticleForm)
 
 	r.Path("/article/new/").Methods("POST").HandlerFunc(h.ArticleNew)

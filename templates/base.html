@@ -15,20 +15,28 @@
                     Все статьи
                 </a>
 
-                <a class="navbar-item" href="/article/new/">
-                    Написать статью
-                </a>
+                {{ if .IsAuthorized }}
+                    <a class="navbar-item" href="/article/new/">
+                        Написать статью
+                    </a>
+                {{ end }}
             </div>
 
             <div class="navbar-end">
                 <div class="navbar-item">
                     <div class="buttons">
-                        <a class="button is-light" href="/signup/">
-                            Зарегистрироваться
-                        </a>
-                        <a class="button is-light" href="/login/">
-                            Войти
-                        </a>
+                        {{ if .IsAuthorized }}
+                            <a class="button is-light" href="/logout/">
+                                Выйти
+                            </a>
+                        {{ else }}
+                            <a class="button is-light" href="/signup/">
+                                Зарегистрироваться
+                            </a>
+                            <a class="button is-light" href="/login/">
+                                Войти
+                            </a>
+                        {{ end }}
                     </div>
                 </div>
             </div>

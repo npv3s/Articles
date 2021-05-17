@@ -41,21 +41,13 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) LoginForm(w http.ResponseWriter, r *http.Request) {
+	user := h.GetUserId(r)
 	tp, err := template.New("").ParseFiles("templates/base.html", "templates/login.html")
 	if err != nil {
 		log.Fatal("template rendering error:", err)
 	}
 
-	content := struct{}{}
-
-	err = tp.ExecuteTemplate(w, "base", struct {
-		Title   string
-		Content interface{}
-	}{
-		"Вход",
-		content,
-	})
-
+	err = tp.ExecuteTemplate(w, "base", baseTemplate{"Вход", user != nil, struct{}{}})
 	if err != nil {
 		http.Error(w, "template rendering error: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -80,23 +72,25 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) SignUpForm(w http.ResponseWriter, r *http.Request) {
+	user := h.GetUserId(r)
+
 	tp, err := template.New("").ParseFiles("templates/base.html", "templates/signup.html")
 	if err != nil {
 		log.Fatal("template rendering error:", err)
 	}
 
-	content := struct{}{}
-
-	err = tp.ExecuteTemplate(w, "base", struct {
-		Title   string
-		Content interface{}
-	}{
-		"Регистрация",
-		content,
-	})
-
+	err = tp.ExecuteTemplate(w, "base", baseTemplate{"Регистрация", user != nil, struct{}{}})
 	if err != nil {
 		http.Error(w, "template rendering error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{Name: "user_id", Value: "0", Path: "/", Domain: "localhost", Expires: time.Now().Add(time.Millisecond * 300)})
+	http.SetCookie(w, &http.Cookie{Name: "token", Value: "del", Path: "/", Domain: "localhost", Expires: time.Now().Add(time.Millisecond * 300)})
+
+	_, _ = w.Write([]byte("<script>setTimeout(() => document.location.href = '/', 500)</script>"))
+
+	w.WriteHeader(http.StatusOK)
 }
