@@ -22,9 +22,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	h := handler.NewHandler(db)
+	h, err := handler.NewHandler(db)
+	if err != nil {
+		log.Fatal("Can't create handler:", err)
+	}
 
 	r := mux.NewRouter()
+
+	r.Path("/admin/").HandlerFunc(h.AdminForm)
 
 	r.Path("/login/").Methods("GET").HandlerFunc(h.LoginForm)
 
