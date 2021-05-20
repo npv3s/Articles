@@ -90,7 +90,6 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{Name: "user_id", Value: "0", Path: "/", Domain: "localhost", Expires: time.Now().Add(time.Millisecond * 300)})
 	http.SetCookie(w, &http.Cookie{Name: "token", Value: "del", Path: "/", Domain: "localhost", Expires: time.Now().Add(time.Millisecond * 300)})
 
-	_, _ = w.Write([]byte("<script>setTimeout(() => document.location.href = '/', 500)</script>"))
-
 	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte("<script>setTimeout(() => document.location.href = '/', 500)</script>"))
 }
