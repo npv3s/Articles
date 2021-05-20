@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS public."user"
     id SERIAL,
     login character varying(250),
     pass_hash character(60),
+    is_admin bool DEFAULT false NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -78,6 +79,28 @@ END;`
 	}, nil
 }
 
+func (db *PgDB) GetAdmins() ([]int, error) {
+	sql := `SELECT id FROM public."user" WHERE is_admin = TRUE`
+	rows, err := db.pool.Query(context.Background(), sql)
+	if err != nil {
+		return nil, err
+	}
+
+	var admins []int
+
+	defer rows.Close()
+	for rows.Next() {
+		var id int
+		err = rows.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+		admins = append(admins, id)
+	}
+
+	return admins, nil
+}
+
 func (db *PgDB) NewUser(login, passHash string) (*int, error) {
 	r, err := db.pool.Exec(context.Background(), `INSERT INTO public."user"(login, pass_hash) VALUES($1, $2)`, login, passHash)
 	if err != nil {
@@ -116,6 +139,42 @@ func (db *PgDB) GetUserById(userId int) (*User, error) {
 	}
 
 	return &User{userId, login, passHash}, nil
+}
+
+func (db *PgDB) GetUsers() ([]User, error) {
+	sql := `SELECT id, login FROM public."user"`
+	rows, err := db.pool.Query(context.Background(), sql)
+	if err != nil {
+		return nil, err
+	}
+
+	var users []User
+
+	defer rows.Close()
+	for rows.Next() {
+		var id int
+		var login string
+		err = rows.Scan(&id, &login)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, User{id, login, ""})
+	}
+
+	return users, nil
+}
+
+func (db *PgDB) NewPassword(userId int, passHash string) error {
+	sql := `UPDATE public."user" SET pass_hash = $2 WHERE id = $1`
+	_, err := db.pool.Exec(context.Background(), sql, userId, passHash)
+	return err
+}
+
+func (db *PgDB) IsAdmin(userId int) (bool, error) {
+	isAdmin := false
+	sql := `SELECT is_admin FROM public."user" WHERE id = $1`
+	err := db.pool.QueryRow(context.Background(), sql, userId).Scan(&isAdmin)
+	return isAdmin, err
 }
 
 func (db *PgDB) NewArticle(authorId int, title, text string) (*int, error) {
@@ -194,13 +253,11 @@ func (db *PgDB) GetArticle(id int) (*Article, error) {
 
 func (db *PgDB) checkAuthor(userId, articleId int) (bool, error) {
 	var authorId *int
-	sql := `SELECT author FROM public.article WHERE id = $1`
-	err := db.pool.QueryRow(context.Background(), sql, articleId).Scan(&authorId)
+	sql := `SELECT COALESCE((SELECT author FROM public.article WHERE id = $1 AND author = $2), (SELECT id FROM public."user" WHERE id = $2 AND is_admin = TRUE))`
+	err := db.pool.QueryRow(context.Background(), sql, articleId, userId).Scan(&authorId)
 	if err != nil {
 		return false, err
 	} else if authorId == nil {
-		return false, nil
-	} else if *authorId != userId {
 		return false, nil
 	} else {
 		return true, nil

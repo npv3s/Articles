@@ -35,6 +35,10 @@ type Database interface {
 	NewUser(login, passHash string) (*int, error)
 	GetUserByLogin(login string) (*User, error)
 	GetUserById(userId int) (*User, error)
+	GetUsers() ([]User, error)
+	GetAdmins() ([]int, error)
+	NewPassword(userId int, passHash string) error
+	IsAdmin(userId int) (bool, error)
 
 	NewArticle(authorId int, title, text string) (*int, error)
 	GetArticles() ([]ArticleDescription, error)
