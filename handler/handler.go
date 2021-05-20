@@ -8,9 +8,9 @@ import (
 )
 
 type baseTemplate struct {
-	Title string
+	Title        string
 	IsAuthorized bool
-	Content interface{}
+	Content      interface{}
 }
 
 type Handler struct {
@@ -18,11 +18,16 @@ type Handler struct {
 	database      interface{ database.Database }
 }
 
-func NewHandler(database interface{ database.Database }) Handler {
-	return Handler{
-		authenticator.NewAuthenticator(database),
-		database,
+func NewHandler(database interface{ database.Database }) (*Handler, error) {
+	auth, err := authenticator.NewAuthenticator(database)
+	if err != nil {
+		return nil, err
 	}
+
+	return &Handler{
+		*auth,
+		database,
+	}, nil
 }
 
 func (h *Handler) GetUserId(r *http.Request) *int {

@@ -38,6 +38,10 @@ func (h *Handler) Article(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := h.GetUserId(r)
+	isAdmin := false
+	if user != nil {
+		isAdmin = h.authenticator.IsAdmin(*user)
+	}
 
 	article, err := h.database.GetArticle(articleId)
 	if err != nil {
@@ -45,7 +49,7 @@ func (h *Handler) Article(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isOwner := false
+	isOwner := isAdmin
 	if user != nil {
 		if *user == article.AuthorId {
 			isOwner = true
