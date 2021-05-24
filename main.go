@@ -29,7 +29,7 @@ func main() {
 
 	r := mux.NewRouter()
 
-	r.Path("/admin/").HandlerFunc(h.AdminForm)
+	//r.Path("/admin/").HandlerFunc(h.AdminForm)
 
 	r.Path("/login/").Methods("GET").HandlerFunc(h.LoginForm)
 
